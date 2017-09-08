@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "concurrently \"npm run server\" \"npm run client\" ",
+    "client": "cd client && npm start",
+    "server": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,7 @@
   },
   "homepage": "https://github.com/andela-emabishi/fupiURL#readme",
   "dependencies": {
+    "concurrently": "^3.5.0",
     "express": "^4.15.4",
     "mongoose": "^4.11.10",
     "shortid": "^2.2.8"
