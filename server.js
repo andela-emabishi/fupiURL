@@ -7,9 +7,8 @@ const app = express();
 const database = 'mongodb://localhost/fupi-url';
 
 
-app.set('PORT', process.env.PORT || 3001);
+app.set('PORT', process.env.PORT || 3005);
 
-// TODO: Method with long as param, will save it into the db and output  short as response
 app.get('/api', (req, res) => {
   res.json({
     status: 200,
@@ -17,7 +16,7 @@ app.get('/api', (req, res) => {
   });
 });
 
-// TODO Will be called when the shorten button is clicked
+// Will be called when the shorten button is clicked
 app.get('/api/url/save', (req, res) => {
   mongoose.connect(database, { useMongoClient: true },  err => {
     if (err) {
@@ -133,4 +132,8 @@ app.get('/api/fu.pi/:short', (req, res) => {
       }
     });
   }
+});
+
+app.listen(app.get('PORT'), () => {
+  console.log(`Server now listening at http://localhost:${app.get('PORT')}`);
 });
