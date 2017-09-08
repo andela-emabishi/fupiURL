@@ -30,6 +30,8 @@ app.get('/api/url/save', (req, res) => {
           message: 'Param needed. Use the form /api/url/save?<urlToBeShortened>',
         });
       } else {
+        // TODO: Check if long already exists in db. If it does, look for the short and send it in the res
+        // If long doesn't exist in the db, save it then send short in result
         Url.save((err, long) => {
           if (err) {
             res.json({
@@ -86,17 +88,30 @@ app.get('/api/url/get', (req, res) => {
 });
 
 
-// Redirect
-// TODO: Will be called when one enters a short url in the browser bar
-app.get('/api/fu.pi/', (req, res) => {
-  const short = req.query.short;
+// Retrieve long url
+// Will be called when one enters a short url in the browser bar
+app.get('/api/fu.pi/:short', (req, res) => {
+  const short = req.params.short;
   if (!short) {
     res.json({
       status: 500,
-      message: ''
+      message:'Supply short form of url'
     });
   } else {
-    // Find url with short form of query param in the db
-    
+    // Look for long form
+    Url.find({ short: short}, (err, url) => {
+      if (err) {
+        res.json({
+          status: 404,
+          error: err,
+          message: `Cannot find url shortfrom  fu.pi/${short}. Have you generated one already?`
+        });
+      } else {
+        res.json({
+          status: 200,
+          url // { short, long }
+        });
+      }
+    });
   }
 });
