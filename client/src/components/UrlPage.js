@@ -29,13 +29,11 @@ class UrlPage extends React.Component {
   }
 
   handleLongLinkInput(event) {
-    console.log(event.target.value, "input");
     const userInputUrl = event.target.value;
     this.validateLongUrl(userInputUrl);
   }
 
   handleShortenButtonClick(event) {
-    // TODO: Call api to get shortened url
     const longUrl = this.state.longUrl;
     return fetch(`/api/url/save?long=${longUrl}`, { accept: "application/json" })
       .then(checkStatus)
@@ -47,7 +45,6 @@ class UrlPage extends React.Component {
   }
 
   render() {
-    console.log('short', this.state.shortUrl)
     return (
       <div>
         <h3>FupiURL../</h3>
