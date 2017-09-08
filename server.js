@@ -32,21 +32,40 @@ app.get('/api/url/save', (req, res) => {
       } else {
         // TODO: Check if long already exists in db. If it does, look for the short and send it in the res
         // If long doesn't exist in the db, save it then send short in result
-        Url.save((err, long) => {
+        Url.find({ long: long }, (err, url) => {
           if (err) {
             res.json({
-              status: 500,
+              status: 404,
               error: err,
-              message: `Error saving url ${long}`,
+            });
+          }
+          if (!url && !err || url === null) {
+            Url.save((err, long) => {
+              if (err) {
+                res.json({
+                  status: 500,
+                  error: err,
+                  message: `Error saving url ${long}`
+                });
+              } else {
+                // Generate short form of url
+                let short = shortid.generate();
+                let url = new Url({
+                  long: long,
+                  short: `fu.pi/${short}`
+                });
+                res.json({
+                  status: 200,
+                  url,
+                  message: `Saved url ${long} successfully with fu.pi/${short} url mapping`
+                });
+              }
             });
           } else {
-            // Generate short form of url
-            let short = shortid.generate();
-            let url = new Url({ long: long, short: `fu.pi/${short}` });
+            // short url has already been generated, no need to generate & save again,  pass the url to the response
             res.json({
               status: 200,
               url,
-              message: `Saved url ${long} successfully with fu.pi/${short} url mapping`,
             });
           }
         });
