@@ -35,16 +35,19 @@ class UrlPage extends React.Component {
   }
 
   handleShortenButtonClick(event) {
-    console.log('Button clicked');
     // TODO: Call api to get shortened url
     const longUrl = this.state.longUrl;
     return fetch(`/api/url/save?long=${longUrl}`, { accept: "application/json" })
       .then(checkStatus)
       .then(parseJSON)
-      .then(url => this.setState({ shortUrl: url['short'] }));
+      .then(url => {
+        const shortUrl = url.url.short;
+        this.setState({ shortUrl: shortUrl });
+      });
   }
 
   render() {
+    console.log('short', this.state.shortUrl)
     return (
       <div>
         <h3>FupiURL../</h3>
