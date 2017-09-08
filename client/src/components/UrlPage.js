@@ -8,8 +8,9 @@ class UrlPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      longUrl: "",
-      error: ""
+      longUrl: '',
+      error: '',
+      shortUrl: 'Your shortened link will appear here',
     };
   }
 
@@ -34,6 +35,7 @@ class UrlPage extends React.Component {
 
   handleShortenButtonClick(event) {
     console.log('Button clicked');
+    // TODO: Call api to get shortened url
   }
 
   render() {
@@ -45,7 +47,7 @@ class UrlPage extends React.Component {
           longUrl={this.state.longUrl}
           handleShortenButtonClick={this.handleShortenButtonClick}
         />
-        <ShortenedLinkDisplay />
+        <ShortenedLinkDisplay url={this.state.shortUrl} />
         <Alert message={this.state.error} />
       </div>
     );

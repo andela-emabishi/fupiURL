@@ -3,7 +3,7 @@ import React from 'react';
 const ShortenedLinkDisplay = (props) => {
   return (
     <div>
-      ShortenedLinkDisplay
+      {props.url}
     </div>
   )
 }
