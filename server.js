@@ -29,8 +29,6 @@ app.get('/api/url/save', (req, res) => {
           message: 'Param needed. Use the form /api/url/save?long=<urlToBeShortened>',
         });
       } else {
-        // TODO: Check if long already exists in db. If it does, look for the short and send it in the res
-        // If long doesn't exist in the db, save it then send short in result
         Url.findOne({ long: long }, (err, url) => {
           if (err) {
             res.json({
@@ -38,7 +36,7 @@ app.get('/api/url/save', (req, res) => {
               error: err,
             });
           }
-          // Can't find the entered url in the db, so save it
+          // Can't find the entered url in the db, so generate the short form and save both
           else if (!url && !err || url === null) {
             // Generate short form of url
             let short = shortid.generate();
@@ -78,7 +76,7 @@ app.get('/api/url/get', (req, res) => {
       if (err) {
         console.log(`Error establishing connection with mongoose to mongodb ${database}`);
       } else {
-        Url.findOne({ long: long}, (err, url) => {
+        Url.findOne({ long: long }, (err, url) => {
           if (err) {
             res.json({
               status: 404,
