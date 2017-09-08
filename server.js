@@ -100,6 +100,7 @@ app.get('/api/url/get', (req, res) => {
 
 // Retrieve long url
 // Will be called when one enters a short url in the browser bar
+// Redirect to long url in window.open
 app.get('/api/url/:short', (req, res) => {
   const short = req.params.short;
   if (!short) {
@@ -119,7 +120,7 @@ app.get('/api/url/:short', (req, res) => {
             res.json({
               status: 404,
               error: err,
-              message: `Cannot find url shortfrom  fupi/${short}. Have you generated one already?`
+              message: `Cannot find long url from  fupi/${short}. Have you generated one already?`
             });
           }
         });
