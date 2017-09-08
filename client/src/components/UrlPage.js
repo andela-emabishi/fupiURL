@@ -2,7 +2,8 @@ import React from 'react';
 import LongLinkInput from './LongLinkInput';
 import ShortenedLinkDisplay from "./ShortenedLinkDisplay";
 import Alert from "./Alert";
-import validate from 'validate.js';
+import { checkStatus, parseJSON } from '../utils';
+import { isWebUri } from "valid-url";
 
 class UrlPage extends React.Component {
   constructor(props) {
@@ -12,14 +13,14 @@ class UrlPage extends React.Component {
       error: '',
       shortUrl: 'Your shortened link will appear here',
     };
+
+    this.handleShortenButtonClick = this.handleShortenButtonClick.bind(this);
+    this.handleLongLinkInput = this.handleLongLinkInput.bind(this);
   }
 
   validateLongUrl(url) {
-    const response = validate(
-      { website: url },
-      { website: { url: true, message: "Link entered invalid" } }
-    );
-    if (response === undefined) {
+    const response = isWebUri(url);
+    if (response !== undefined) {
       // Returns undefined if url is valid
       this.setState({ longUrl: url });
     } else {
@@ -30,12 +31,17 @@ class UrlPage extends React.Component {
   handleLongLinkInput(event) {
     console.log(event.target.value, "input");
     const userInputUrl = event.target.value;
-    const validUrl = this.validateLongUrl(userInputUrl);
+    this.validateLongUrl(userInputUrl);
   }
 
   handleShortenButtonClick(event) {
     console.log('Button clicked');
     // TODO: Call api to get shortened url
+    const longUrl = this.state.longUrl;
+    return fetch(`/api/url/save?long=${longUrl}`, { accept: "application/json" })
+      .then(checkStatus)
+      .then(parseJSON)
+      .then(url => this.setState({ shortUrl: url['short'] }));
   }
 
   render() {
