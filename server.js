@@ -26,44 +26,36 @@ app.get('/api/url/save', (req, res) => {
       if (!long) {
         res.send({
           status: 500,
-          message: 'Param needed. Use the form /api/url/save?<urlToBeShortened>',
+          message: 'Param needed. Use the form /api/url/save?long=<urlToBeShortened>',
         });
       } else {
         // TODO: Check if long already exists in db. If it does, look for the short and send it in the res
         // If long doesn't exist in the db, save it then send short in result
-        Url.find({ long: long }, (err, url) => {
+        Url.findOne({ long: long }, (err, url) => {
           if (err) {
             res.json({
               status: 404,
               error: err,
             });
           }
-          if (!url && !err || url === null) {
-            Url.save((err, long) => {
-              if (err) {
-                res.json({
-                  status: 500,
-                  error: err,
-                  message: `Error saving url ${long}`
-                });
-              } else {
-                // Generate short form of url
-                let short = shortid.generate();
-                let url = new Url({
-                  long: long,
-                  short: `fu.pi/${short}`
-                });
-                res.json({
-                  status: 200,
-                  url,
-                  message: `Saved url ${long} successfully with fu.pi/${short} url mapping`
-                });
-              }
+          // Can't find the entered url in the db, so save it
+          else if (!url && !err || url === null) {
+            // Generate short form of url
+            let short = shortid.generate();
+            let url = new Url({
+              long: long,
+              short: `fupi-${short}`
             });
-          } else {
+            url.save((err, long) => {
+              res.json({
+                status: 200,
+                url,
+              });
+            });
+          } else if (url !== null) {
             // short url has already been generated, no need to generate & save again,  pass the url to the response
             res.json({
-              status: 200,
+              status: 200, // 303: Resource Already exists?
               url,
             });
           }
@@ -82,11 +74,11 @@ app.get('/api/url/get', (req, res) => {
       message: 'To retrieve the short form of a url, you must supply the long form.',
     });
   } else {
-    mongoose.connection(database, { useMongoClient: true }, err => {
+    mongoose.connect(database, { useMongoClient: true }, err => {
       if (err) {
         console.log(`Error establishing connection with mongoose to mongodb ${database}`);
       } else {
-        Url.find({ long: long}, (err, url) => {
+        Url.findOne({ long: long}, (err, url) => {
           if (err) {
             res.json({
               status: 404,
@@ -108,32 +100,34 @@ app.get('/api/url/get', (req, res) => {
 
 // Retrieve long url
 // Will be called when one enters a short url in the browser bar
-app.get('/api/fu.pi/:short', (req, res) => {
+app.get('/api/url/:short', (req, res) => {
   const short = req.params.short;
   if (!short) {
     res.json({
       status: 500,
       message:'Supply short form of url'
     });
-  } else {
-    // Look for long form
-    Url.find({ short: short}, (err, url) => {
+  } else if(short) {
+    mongoose.connect(database, { useMongoClient: true }, err => {
       if (err) {
-        res.json({
-          status: 404,
-          error: err,
-          message: `Cannot find url shortfrom  fu.pi/${short}. Have you generated one already?`
-        });
+        console.log(`Error establishing connection with mongoose to mongodb ${database}`);
       } else {
-        res.json({
-          status: 200,
-          url // { short, long }
+        Url.findOne({ short: short }, (err, url) => {
+          if (url !== null) {
+            res.json({ status: 200, url }); // { short, long }
+          } else if (err || url === null) {
+            res.json({
+              status: 404,
+              error: err,
+              message: `Cannot find url shortfrom  fupi/${short}. Have you generated one already?`
+            });
+          }
         });
       }
     });
-  }
+  } 
 });
 
 app.listen(app.get('PORT'), () => {
-  console.log(`Server now listening at http://localhost:${app.get('PORT')}`);
+  console.log(`Server now listening at http://localhost:${app.get('PORT')}/api`);
 });
